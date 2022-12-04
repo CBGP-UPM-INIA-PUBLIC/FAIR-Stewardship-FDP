@@ -27,12 +27,12 @@ services:
     ports:
       - 7200:7200
     volumes:
-      - %PWD/database:/opt/graphdb/home
+      - $PWD/database:/opt/graphdb/home
     networks:
       - default
 
   fdp:
-    image: fairdata/fairdatapoint:1.13.1
+    image: fairdata/fairdatapoint:1.15.0
     restart: always
     volumes:
       - ./fdp/application.yml:/fdp/application.yml:ro
@@ -54,43 +54,43 @@ services:
       - default
 
 
-  cde-box-daemon: 
-    image: markw/cde-box-daemon:latest
-    container_name: cde-box-daemon-course
-    restart: always
-    depends_on:
-      - yarrrml_transform
-      - rdfizer
-    ports:
-      - 4567:4567
-    environment:
-      GraphDB_User: ${GraphDB_User}
-      GraphDB_Pass: ${GraphDB_Pass}
-      baseURI: ${baseURI}
-    volumes:
-        - ./data:/data
-        - ./config:/config
-    networks:
-      - default
-      - graphdb
+#  cde-box-daemon: 
+#    image: markw/cde-box-daemon:latest
+#    container_name: cde-box-daemon-course
+#    restart: always
+#    depends_on:
+#      - yarrrml_transform
+#      - rdfizer
+#    ports:
+#      - 4567:4567
+#    environment:
+#      GraphDB_User: ${GraphDB_User}
+#      GraphDB_Pass: ${GraphDB_Pass}
+#      baseURI: ${baseURI}
+#    volumes:
+#        - ./data:/data
+#        - ./config:/config
+#    networks:
+#      - default
+#      - graphdb
 
         
-  yarrrml_transform: 
-    image: markw/yarrrml-parser-ejp:latest
-    container_name: yarrrml_transform-course
-    restart: always
-    volumes:
-      - ./data:/data
-    environment:
-      baseURI: ${baseURI}
+#  yarrrml_transform: 
+#    image: markw/yarrrml-parser-ejp:latest
+#    container_name: yarrrml_transform-course
+#    restart: always
+#    volumes:
+#      - ./data:/data
+#    environment:
+#      baseURI: ${baseURI}
   
-  rdfizer: 
-    image: markw/sdmrdfizer_ejp:0.3.0
-    container_name: rdfizer-course
-    restart: always
-    volumes:
-      - ./data:/data
-      - ./config:/config
+#  rdfizer: 
+#    image: markw/sdmrdfizer_ejp:0.3.0
+#    container_name: rdfizer-course
+#    restart: always
+#    volumes:
+#      - ./data:/data
+#      - ./config:/config
       
 volumes:
   fair-data-point:
