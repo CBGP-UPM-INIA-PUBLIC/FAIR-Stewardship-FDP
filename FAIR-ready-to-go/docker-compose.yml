@@ -1,0 +1,106 @@
+version: "3"
+services:
+
+  # FAIR Data Point client	
+  fdp_client:
+    image: fairdata/fairdatapoint-client:1.15.0
+    hostname: fdpclient
+    restart: always
+    environment:
+      FDP_HOST: fdp
+    volumes:
+      - ./fdp/variables.scss:/src/scss/custom/_variables.scss:ro
+      - ./fdp/assets:/usr/share/nginx/html/assets:ro
+      - ./fdp/favicon.ico:/usr/share/nginx/html/favicon.ico:ro
+    depends_on:
+      - fdp
+    ports:
+      - 7070:80  # You can close this port, if you are using hitch+varnish
+    networks:
+      - default
+
+
+  graphdb:
+    image: graphdb:local
+    restart: always
+    hostname: graphdb
+    ports:
+      - 7200:7200
+    volumes:
+      - %PWD/database:/opt/graphdb/home
+    networks:
+      - default
+
+  fdp:
+    image: fairdata/fairdatapoint:1.13.1
+    restart: always
+    volumes:
+      - ./fdp/application.yml:/fdp/application.yml:ro
+    depends_on:
+      - mongo
+      - graphdb
+    networks:
+      - default
+        
+
+  # Mongo for FDP server    
+  mongo:
+    image: mongo:4.2.3
+    restart: always
+    volumes:
+      - $PWD/mongo-data:/data/db
+      - $PWD/mongo-init:/docker-entrypoint-initdb.d/
+    networks:
+      - default
+
+
+  cde-box-daemon: 
+    image: markw/cde-box-daemon:latest
+    container_name: cde-box-daemon-course
+    restart: always
+    depends_on:
+      - yarrrml_transform
+      - rdfizer
+    ports:
+      - 4567:4567
+    environment:
+      GraphDB_User: ${GraphDB_User}
+      GraphDB_Pass: ${GraphDB_Pass}
+      baseURI: ${baseURI}
+    volumes:
+        - ./data:/data
+        - ./config:/config
+    networks:
+      - default
+      - graphdb
+
+        
+  yarrrml_transform: 
+    image: markw/yarrrml-parser-ejp:latest
+    container_name: yarrrml_transform-course
+    restart: always
+    volumes:
+      - ./data:/data
+    environment:
+      baseURI: ${baseURI}
+  
+  rdfizer: 
+    image: markw/sdmrdfizer_ejp:0.3.0
+    container_name: rdfizer-course
+    restart: always
+    volumes:
+      - ./data:/data
+      - ./config:/config
+      
+volumes:
+  fair-data-point:
+    external: true
+  mongo-data:
+    external: true
+  mongo-init:
+    external: true
+  fdp-server:
+    external: true
+
+networks:
+  graphdb:
